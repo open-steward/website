@@ -7,7 +7,8 @@
 #
 #   What changed  ->  Stack            infra/: its tests and typecheck
 #                 ->  Sites            unit tests, build, typecheck, built-HTML check; keeps out/
-#                       ->  Browser check (chromium), Browser check (webkit), in parallel
+#                       ->  Browser check (chromium, on Ubuntu), Browser check (webkit, on macOS),
+#                           in parallel
 #   Build and check: passes when every job above passed or was skipped. It is the check the
 #   ruleset on main requires and the product sync waits for. Skipped jobs count as passed;
 #   a workflow-level `paths:` filter would instead leave the required check waiting forever.
@@ -170,7 +171,9 @@ jobs:
     name: Browser check
     needs: site
     if: needs.site.result == 'success' && !contains(github.event.pull_request.labels.*.name, 'skip-browser-check')
-    runs-on: ubuntu-24.04
+    # WebKit runs on macOS, where Playwright's build needs no system packages. On Ubuntu it needs
+    # about 180 from apt, and the runner's mirror crawled at a package a second in 2 of 4 runs.
+    runs-on: ${{ matrix.browser == 'webkit' && 'macos-15' || 'ubuntu-24.04' }}
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -191,17 +194,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Headless Chromium runs on the runner image's libraries; WebKit needs its own from apt.
-      # An apt mirror once stalled that for 19 minutes: fail fast instead, and re-run.
+      # Headless Chromium runs on the Ubuntu image's libraries, WebKit on macOS's: neither needs apt.
       - name: Install ${{ matrix.browser }}
         timeout-minutes: 6
         env:
           BROWSER: ${{ matrix.browser }}
         run: |
           if [ "$BROWSER" = webkit ]; then
-            pnpm exec playwright install --with-deps "$BROWSER"
+            pnpm exec playwright install webkit
           else
-            pnpm exec playwright install --only-shell "$BROWSER"
+            pnpm exec playwright install --only-shell chromium
           fi
 
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
