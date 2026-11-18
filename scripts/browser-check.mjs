@@ -9,6 +9,7 @@
 //
 //   node scripts/browser-check.mjs              (after `pnpm build`)
 //   SCREENSHOTS=<dir> node scripts/browser-check.mjs   also saves a screenshot of each page
+//   BROWSER=webkit node scripts/browser-check.mjs       one browser only (CI runs one job each)
 
 import { spawn } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
@@ -19,6 +20,8 @@ const PORT = 4400 + Math.floor(Math.random() * 400)
 const SITE = `http://localhost:${PORT}`
 const DOCS = `http://localhost:${PORT + 1}`
 const shots = process.env.SCREENSHOTS
+const browserTypes = [chromium, webkit].filter((b) => !process.env.BROWSER || b.name() === process.env.BROWSER)
+if (browserTypes.length === 0) throw new Error(`BROWSER=${process.env.BROWSER}: expected chromium or webkit`)
 
 const PAGES = [
   { url: `${SITE}/`, name: 'site-home' },
@@ -404,7 +407,7 @@ async function visit(browserType, viewport, spec) {
 
 const contexts = {}
 try {
-  for (const browserType of [chromium, webkit]) {
+  for (const browserType of browserTypes) {
     contexts[browserType.name()] = await browserType.launch()
     for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
       for (const spec of PAGES) await visit(browserType, viewport, spec)
@@ -416,5 +419,6 @@ try {
 }
 
 for (const problem of problems) console.error(problem)
-console.log(`browser check: ${PAGES.length} pages × 2 browsers × 2 sizes, ${problems.length} problems`)
+const names = browserTypes.map((b) => b.name()).join(' and ')
+console.log(`browser check: ${PAGES.length} pages × ${names} × 2 sizes, ${problems.length} problems`)
 process.exit(problems.length === 0 ? 0 : 1)

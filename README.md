@@ -66,6 +66,7 @@ _astro/...    both builds' content-hashed CSS, JS, fonts and images, shared by b
   (`check-built-html.mjs`, `browser-check.mjs`), preview it locally through the real CloudFront
   Functions (`preview.mjs`), and deploy it (`deploy.mjs`).
 - `.github/workflows/site.yml`: build and check on every pull request and push; deploy on main.
+  A pull request runs only the jobs its files can affect (the workflow's header lists them).
 - `.github/workflows/product-sync.yml` and `scripts/product-sync.mjs`: every hour, a pull request
   that moves `product.json` to the product's newest commit, merged once its checks pass (see
   "Staying in sync with the product").
@@ -180,6 +181,9 @@ pnpm typecheck
 pnpm check:html
 pnpm test:browser
 ```
+
+`BROWSER=webkit pnpm test:browser` checks one browser; CI runs one job per browser. On a pull
+request, the label `skip-browser-check` skips the browser jobs; pushes to main always run them.
 
 For live reloading while editing one site: `pnpm --filter @opensteward-website/site dev`
 (the docs: `pnpm --filter @opensteward-website/docs dev`).
