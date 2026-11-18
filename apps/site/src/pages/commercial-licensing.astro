@@ -1,0 +1,40 @@
+---
+// The product's COMMERCIAL-LICENSE.md at the pinned commit, with its "Questions that settle the
+// rest" as a decision tree. The numbered list is the version without JavaScript;
+// decision-tree.ts turns it into one question at a time, from the JSON below.
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import Base from '../layouts/Base.astro'
+import { LICENSE_CTA, LINKS, PRODUCT, SUPPORT_EMAIL } from '../data/product'
+import { parseDecisionTree, renderCommercialLicense } from '../lib/commercial-license.mjs'
+
+// Relative to the app folder, as product.ts reads the docs.
+const markdown = readFileSync(resolve(process.cwd(), '../../.product/COMMERCIAL-LICENSE.md'), 'utf8')
+const tree = parseDecisionTree(markdown)
+const { title, intro, html } = renderCommercialLicense(markdown, PRODUCT)
+
+const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+const count = tree.questions.length
+const jump = `Find out in ${WORDS[count] ?? count} question${count === 1 ? '' : 's'}`
+// JSON, not code: the policy allows it. "<" is escaped so the text cannot close the element.
+const data = JSON.stringify({ tree, cta: { label: LICENSE_CTA, href: LINKS.license }, email: SUPPORT_EMAIL }).replace(
+  /</g,
+  '\\u003c',
+)
+---
+
+<Base title="Commercial licensing" description={intro}>
+  <div class="marketing">
+    <header class="page-head">
+      <div class="eyebrow">Licensing</div>
+      <h1>{title}</h1>
+      <p>{intro}</p>
+      <p class="page-head__actions"><a class="btn btn--secondary" href="#questions-that-settle-the-rest">{jump}</a></p>
+    </header>
+    <div class="prose" set:html={html} />
+  </div>
+  <script type="application/json" id="decision-tree-data" set:html={data} />
+  <script>
+    import '../scripts/decision-tree'
+  </script>
+</Base>

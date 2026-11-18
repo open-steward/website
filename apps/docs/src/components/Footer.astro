@@ -1,0 +1,37 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro'
+import product from '../../../../product.json'
+
+const { commit } = product
+---
+
+<Default />
+<div class="site-legal">
+  <p>
+    <a href="https://opensteward.dev/">opensteward.dev</a> ·
+    <a href="https://license.opensteward.dev/">Plans and free license</a> ·
+    <a href="https://license.opensteward.dev/terms">Terms</a> ·
+    <a href="https://license.opensteward.dev/privacy">Privacy</a> ·
+    <a href="mailto:support@opensteward.dev">support@opensteward.dev</a>
+  </p>
+  <p>
+    © 2026 Falco Consulting AB. Built from <a href={`https://github.com/open-steward/opensteward/tree/${commit}/docs`}>open-steward/opensteward@{commit.slice(0, 7)}</a>.
+    This site sets no cookies, runs no analytics and loads nothing from other sites, except platform logos from Brandfetch on the Platforms page.
+  </p>
+</div>
+
+<style>
+  .site-legal {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--sl-color-hairline);
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+  }
+  .site-legal p {
+    margin: 0.25rem 0;
+  }
+  .site-legal a {
+    color: var(--sl-color-gray-2);
+  }
+</style>

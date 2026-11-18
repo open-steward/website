@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" color="#90AE78" role="img" aria-label="OpenSteward mark — Classic key (dark)">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="18" cy="32" r="8.5" fill="#1B1A17"></circle>
+    <line x1="26.5" y1="32" x2="52" y2="32"></line>
+    <line x1="44" y1="32" x2="44" y2="40"></line>
+    <line x1="50" y1="32" x2="50" y2="38"></line>
+  </g>
+</svg>

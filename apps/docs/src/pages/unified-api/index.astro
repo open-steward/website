@@ -1,0 +1,19 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro'
+import ApiReference from '../../components/ApiReference.astro'
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Unified API',
+    description: 'The unified OpenSteward API: every vertical, resource and operation, from the OpenAPI spec.',
+    tableOfContents: false,
+  }}
+>
+  <p>
+    Every operation of the unified API, grouped by vertical, from the OpenAPI spec the code generates.
+    Download it as <a href="/downloads/openapi/openapi.json">openapi.json</a> or <a href="/downloads/openapi/openapi.yaml">openapi.yaml</a>.
+    To call the API, use your install's own docs-server or the <a href="/postman/">Postman collections</a>.
+  </p>
+  <ApiReference spec="/downloads/openapi/openapi.json" label="Unified API" groupNoun="vertical" groupsEyebrow="Verticals" />
+</StarlightPage>

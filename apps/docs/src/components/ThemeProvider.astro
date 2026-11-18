@@ -1,0 +1,14 @@
+---
+// Starlight's ThemeProvider with its inline script moved to /theme-provider.js (the
+// Content-Security-Policy allows no inline script). A classic script without defer, so the
+// theme is still set before the first paint.
+import { Icon } from '@astrojs/starlight/components'
+---
+
+<script is:inline src="/theme-provider.js"></script>
+
+<template id="theme-icons">
+  <Icon name="sun" class="light" />
+  <Icon name="moon" class="dark" />
+  <Icon name="laptop" class="auto" />
+</template>

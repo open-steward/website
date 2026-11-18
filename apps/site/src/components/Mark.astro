@@ -1,0 +1,24 @@
+---
+// The OpenSteward mark (the key), stroked in currentColor so it follows the theme. Same drawing
+// as packages/design-system/logo/mark.svg.
+interface Props {
+  class?: string
+  label?: string
+}
+const { class: className = 'mark', label } = Astro.props
+---
+
+<svg
+  class={className}
+  viewBox="0 0 64 64"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+>
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="18" cy="32" r="8.5"></circle>
+    <line x1="26.5" y1="32" x2="52" y2="32"></line>
+    <line x1="44" y1="32" x2="44" y2="40"></line>
+    <line x1="50" y1="32" x2="50" y2="38"></line>
+  </g>
+</svg>

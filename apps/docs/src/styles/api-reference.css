@@ -1,0 +1,207 @@
+/* The API reference pages (components/ApiReference.astro): the product docs-server's Swagger
+   shell, inside Starlight's page. Loaded after swagger-ui.css and the design system's
+   swagger-theme.css, and like them not in a cascade layer, so these win over both. */
+
+/* These pages need the width: no "On this page" column, and the content column runs wide. */
+:root:has(.api-ref) {
+  --sl-content-width: 100%;
+}
+
+.api-ref {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+  margin-top: var(--space-4);
+}
+.api-ref__main {
+  min-width: 0;
+}
+
+/* Swagger UI's own servers bar is sticky at the top; under Starlight's header it slides out of
+   sight. Keep it in the flow. */
+.api-ref .swagger-ui .scheme-container {
+  position: static;
+  box-shadow: none;
+  background: transparent;
+  padding: var(--space-2) 0;
+}
+.api-ref .swagger-ui .wrapper {
+  padding: 0;
+}
+/* One filter: the rail's. It drives the same Redux action as this box. */
+.api-ref .swagger-ui .filter-container {
+  display: none;
+}
+.api-ref .opblock[hidden] {
+  display: none !important;
+}
+
+/* The rail */
+.api-ref__rail {
+  position: sticky;
+  top: calc(var(--sl-nav-height) + var(--space-2));
+  max-height: calc(100vh - var(--sl-nav-height) - var(--space-4));
+  overflow-y: auto;
+  padding: var(--space-2) 0 var(--space-4);
+  font-size: var(--text-sm);
+  border-right: 1px solid var(--border-subtle);
+}
+.api-ref__filter {
+  margin: 0 var(--space-3) var(--space-4) 0;
+}
+.api-ref__filter input {
+  width: 100%;
+  height: 32px;
+  padding: 0 var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--fg-1);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+.api-ref__filter input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--shadow-focus);
+}
+.api-ref__filter input::placeholder {
+  color: var(--fg-4);
+}
+
+.api-ref__section {
+  padding-right: var(--space-3);
+}
+.api-ref__section + .api-ref__section {
+  margin-top: var(--space-4);
+}
+.api-ref__eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+  color: var(--fg-3);
+  padding: 0 var(--space-2);
+  margin-bottom: var(--space-1_5);
+}
+
+.api-ref__tag {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 6px var(--space-2);
+  margin-left: -2px;
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: none;
+  color: var(--fg-2);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.api-ref__tag:hover {
+  color: var(--fg-1);
+  background: var(--surface-1);
+}
+.api-ref__tag[aria-current='true'] {
+  color: var(--fg-1);
+  font-weight: 500;
+  background: var(--surface-1);
+  border-left-color: var(--accent);
+}
+.api-ref__tag-label {
+  flex: 1;
+  min-width: 0;
+}
+.api-ref__tag-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+}
+
+.api-ref__op {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px var(--space-2);
+  color: var(--fg-2);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-xs);
+}
+.api-ref__op:hover {
+  background: var(--surface-1);
+  color: var(--fg-1);
+}
+.api-ref__op-method {
+  flex-shrink: 0;
+  min-width: 36px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  text-align: right;
+  color: var(--fg-3);
+}
+.api-ref__op-method--get { color: var(--method-get); }
+.api-ref__op-method--post { color: var(--method-post); }
+.api-ref__op-method--put { color: var(--method-put); }
+.api-ref__op-method--patch { color: var(--method-patch); }
+.api-ref__op-method--delete { color: var(--method-delete); }
+.api-ref__op-method--head { color: var(--method-head); }
+.api-ref__op-method--options { color: var(--method-options); }
+.api-ref__op-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.api-ref__empty {
+  padding: var(--space-3) var(--space-2);
+  color: var(--fg-3);
+  font-size: var(--text-sm);
+}
+
+/* The vertical monogram tiles, from the design system's components.css (which the docs do not
+   load whole: its element rules would restyle Starlight). */
+.api-ref .vtile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 10px;
+  background: var(--surface-1);
+  color: var(--fg-2);
+}
+.api-ref .vtile--crm { background: var(--vertical-crm-bg); color: var(--vertical-crm); }
+.api-ref .vtile--accounting { background: var(--vertical-accounting-bg); color: var(--vertical-accounting); }
+.api-ref .vtile--logistics { background: var(--vertical-logistics-bg); color: var(--vertical-logistics); }
+.api-ref .vtile--ecommerce { background: var(--vertical-ecommerce-bg); color: var(--vertical-ecommerce); }
+.api-ref .vtile--payments { background: var(--vertical-payments-bg); color: var(--vertical-payments); }
+.api-ref .vtile--docsign { background: var(--vertical-docsign-bg); color: var(--vertical-docsign); }
+.api-ref .vtile--projects { background: var(--vertical-projects-bg); color: var(--vertical-projects); }
+.api-ref .vtile--customer-support { background: var(--vertical-customer-support-bg); color: var(--vertical-customer-support); }
+.api-ref .vtile--inventory { background: var(--vertical-inventory-bg); color: var(--vertical-inventory); }
+
+/* Narrow: the rail goes above the reference. */
+@media (max-width: 72rem) {
+  .api-ref {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+  }
+  .api-ref__rail {
+    position: static;
+    max-height: 18rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+}

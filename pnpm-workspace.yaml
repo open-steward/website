@@ -1,0 +1,12 @@
+packages:
+  - apps/*
+  - infra
+
+# Supply chain: install nothing published in the last 7 days (in minutes).
+minimumReleaseAge: 10080
+
+# The only packages whose install scripts may run (esbuild fetches its native binary). Scarf
+# (pulled in by swagger-ui-dist) is install-time telemetry: never run it.
+allowBuilds:
+  '@scarf/scarf': false
+  esbuild: true

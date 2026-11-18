@@ -1,0 +1,33 @@
+---
+// Served for missing pages on both opensteward.dev and docs.opensteward.dev: the deploy copies
+// it to the bucket root, where CloudFront's error response fetches it. So every link here is
+// absolute, and its assets come from the shared /_astro/ prefix.
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { runInNewContext } from 'node:vm'
+import Base from '../layouts/Base.astro'
+import { LINKS } from '../data/product'
+
+// CloudFront skips the viewer-response function for error responses, so this page arrives
+// without the security headers. It carries the site's policy itself, read from the function
+// so the two cannot drift; frame-ancestors only works as a header and is left out.
+const fn: { SITE_CSP?: string } = {}
+runInNewContext(readFileSync(resolve(process.cwd(), '../../infra/functions/viewer-response.js'), 'utf8'), fn)
+if (typeof fn.SITE_CSP !== 'string') throw new Error('viewer-response.js defines no SITE_CSP')
+const csp = fn.SITE_CSP.split(';')
+  .map((d) => d.trim())
+  .filter((d) => d && !d.startsWith('frame-ancestors'))
+  .join('; ')
+---
+
+<Base title="Page not found" description="This page does not exist." csp={csp} origin="https://opensteward.dev">
+  <section class="not-found">
+    <div class="eyebrow">404</div>
+    <h1>This page does not exist</h1>
+    <p>It may have moved when the docs were reorganised. Try the home page or the documentation.</p>
+    <div class="hero__actions">
+      <a class="btn btn--primary" href="https://opensteward.dev/">opensteward.dev</a>
+      <a class="btn btn--secondary" href={LINKS.docs}>docs.opensteward.dev</a>
+    </div>
+  </section>
+</Base>

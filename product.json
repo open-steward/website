@@ -1,0 +1,12 @@
+{
+  "repository": "https://github.com/open-steward/opensteward.git",
+  "commit": "a3961d894f12b2203f1e4ba79602d95c190d68fd",
+  "paths": [
+    "README.md",
+    "COMMERCIAL-LICENSE.md",
+    "tsconfig.base.json",
+    "docs/",
+    "packages/design-system/",
+    "packages/platforms-ui/"
+  ]
+}

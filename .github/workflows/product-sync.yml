@@ -1,0 +1,54 @@
+# Keeps the docs in step with the product. Every hour, scripts/product-sync.mjs takes one step:
+# when the product's main has moved past product.json's pin, in files the site reads, it opens
+# (or updates) one pull request that moves the pin and starts Site's "Build and check" on it;
+# once that passes, it merges the PR and starts Site on main, which deploys. A sync that changes
+# more than the product's docs text (its code or styles) waits for a person to merge it instead.
+# README: "Staying in sync with the product".
+#
+# No stored credential: the job uses its own GITHUB_TOKEN, which lasts only as long as the job.
+# It runs only on main, installs nothing, and skips until the repository variable PRODUCT_SYNC
+# is "on". SYNC_ASSIGNEE (a GitHub login, optional) is assigned to a sync PR that fails its
+# checks or stays open for a day.
+#
+# Every action is pinned to a full commit SHA; the comment names its release.
+
+name: Product sync
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: product-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync the docs to the product
+    if: vars.PRODUCT_SYNC == 'on' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write # the branch's one commit, and the merge (main's ruleset still applies)
+      pull-requests: write # the PR and its comments
+      actions: write # start site.yml: the checks on the branch, the deploy on main
+      checks: read # read the checks' result
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      # Node's standard library only: nothing is installed in the job that holds the token.
+      - name: Take the next sync step
+        run: node scripts/product-sync.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SYNC_ASSIGNEE: ${{ vars.SYNC_ASSIGNEE }}

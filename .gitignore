@@ -1,0 +1,28 @@
+node_modules/
+dist/
+out/
+.astro/
+.cache/
+.product/
+cdk.out/
+coverage/
+test-results/
+playwright-report/
+apps/docs/src/content/docs/
+apps/docs/public/generated/
+# Built from the product, and the catalogue script holds the Brandfetch client ID.
+apps/docs/src/generated/
+apps/docs/public/platforms/
+# Working notes, plans and deploy notes: kept locally, never published.
+/private/
+/docs/superpowers/
+.superpowers/
+.DS_Store
+*.log
+.env*
+apps/*/public/brand/
+apps/*/public/favicon.ico
+apps/docs/public/media/
+apps/docs/public/downloads/
+apps/docs/public/diagrams/
+apps/docs/markdown/
