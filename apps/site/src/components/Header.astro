@@ -1,0 +1,53 @@
+---
+// The sticky header of the product's docs-server (apps/docs-server/src/header.ts): brand,
+// links, and below 880px a native <details> menu, so navigation needs no script.
+import Icon from './Icon.astro'
+import Mark from './Mark.astro'
+import { LINKS } from '../data/product'
+
+interface Props {
+  /** Prefix for links to this site: the 404 page is also served on docs.opensteward.dev. */
+  origin?: string
+}
+const { origin = '' } = Astro.props
+const onHome = Astro.url.pathname === '/' && origin === ''
+const anchor = (id: string) => (onHome ? `#${id}` : `${origin}/#${id}`)
+
+const links = [
+  { href: anchor('features'), label: 'Features' },
+  { href: anchor('verticals'), label: 'Verticals' },
+  { href: `${origin}/security/`, label: 'Security' },
+  { href: anchor('licensing'), label: 'Licensing' },
+  { href: LINKS.docs, label: 'Docs' },
+  { href: LINKS.github, label: 'GitHub' },
+]
+---
+
+<header class="oi-nav">
+  <a href={`${origin}/`} class="oi-nav__brand" aria-label="OpenSteward home">
+    <Mark class="oi-nav__mark" />
+    <span class="wordmark"><span>Open</span><span>Steward</span></span>
+  </a>
+  <nav class="oi-nav__links" aria-label="Primary">
+    <span class="oi-nav__group">
+      {
+        links.map((link, i) => (
+          <>
+            {i > 0 && <span class="oi-nav__sep" aria-hidden="true">·</span>}
+            <a href={link.href}>{link.label}</a>
+          </>
+        ))
+      }
+    </span>
+    <details class="oi-nav__menu">
+      <summary aria-label="Menu"><Icon name="list" /></summary>
+      <div class="oi-nav__menu-panel">
+        {links.map((link) => <a href={link.href}>{link.label}</a>)}
+      </div>
+    </details>
+    <button type="button" class="btn btn--ghost btn--sm theme-toggle" data-theme-toggle aria-label="Switch to dark theme">
+      <Icon name="moon" class="icon theme-toggle__moon" />
+      <Icon name="sun" class="icon theme-toggle__sun" />
+    </button>
+  </nav>
+</header>

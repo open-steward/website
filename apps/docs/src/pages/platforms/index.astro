@@ -1,0 +1,28 @@
+---
+// The product's platform catalogue (packages/platforms-ui at the pinned commit), as on its
+// docs-server at /platforms. scripts/sync.mjs writes its parts into src/generated/platforms/:
+// the styles and script are imported here, so Astro serves them as files (the
+// Content-Security-Policy allows no inline code), and the cards are drawn in the browser from
+// /platforms/platforms.json. The list below the grid is for docs search and for readers without
+// JavaScript.
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro'
+import '@phosphor-icons/web/regular'
+import PlatformList from '../../components/PlatformList.astro'
+import parts from '../../generated/platforms/parts.json'
+import '../../generated/platforms/catalogue.css'
+import '../../styles/platforms.css'
+
+const { hero, body, verification } = parts
+---
+
+<StarlightPage frontmatter={{ title: hero.title, description: hero.lead, tableOfContents: false }}>
+  <p class="eyebrow platforms-eyebrow">{hero.eyebrow}</p>
+  <p class="platforms-lead">{hero.lead}</p>
+  <div class="not-content" data-pagefind-ignore set:html={body} />
+  <Fragment set:html={verification} />
+  <PlatformList />
+</StarlightPage>
+
+<script>
+  import '../../generated/platforms/catalogue.js'
+</script>

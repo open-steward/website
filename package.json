@@ -1,0 +1,42 @@
+{
+  "name": "opensteward-website",
+  "private": true,
+  "description": "opensteward.dev and docs.opensteward.dev: the Astro site, the Starlight docs, and the CDK stack that serves them.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "packageManager": "pnpm@12.5.1",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "fetch:product": "node scripts/fetch-product.mjs",
+    "build": "pnpm fetch:product && pnpm --filter @opensteward-website/site build && pnpm --filter @opensteward-website/docs build && node scripts/assemble.mjs",
+    "check:html": "node scripts/check-built-html.mjs out",
+    "test": "node scripts/fetch-product.mjs && pnpm --filter @opensteward-website/infra test && vitest run",
+    "test:browser": "node scripts/browser-check.mjs",
+    "preview": "node scripts/preview.mjs",
+    "typecheck": "pnpm --filter @opensteward-website/infra typecheck && tsc --noEmit -p apps/site && tsc --noEmit -p apps/docs"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-cloudfront": "^3.1164.0",
+    "@aws-sdk/client-s3": "^3.1164.0",
+    "github-slugger": "^2.0.0",
+    "hast-util-select": "^6.0.4",
+    "htmlparser2": "^10.1.0",
+    "mermaid": "^12.3.0",
+    "playwright": "^1.65.0",
+    "rehype-parse": "^9.0.1",
+    "rehype-remark": "^10.0.1",
+    "rehype-stringify": "^10.0.1",
+    "remark-frontmatter": "^5.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "remark-stringify": "^11.0.0",
+    "typescript": "~6.0.3",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.2.0",
+    "vitest": "^5.1.0",
+    "yaml": "^2.9.1"
+  }
+}

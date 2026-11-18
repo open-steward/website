@@ -1,0 +1,313 @@
+---
+import { Image } from 'astro:assets'
+import statusDark from '@product-docs/assets/screenshots/admin/status-dark.png'
+import statusLight from '@product-docs/assets/screenshots/admin/status-light.png'
+import Icon from '../components/Icon.astro'
+import Base from '../layouts/Base.astro'
+import { LICENSE_CTA, LINKS, builtInDashboards, docsPage, platformCount, verifiedLive, verticals } from '../data/product'
+import { levelTag } from '../lib/verification.mjs'
+
+const total = platformCount.toLocaleString('en-US')
+const others = (platformCount - verifiedLive.length).toLocaleString('en-US')
+
+const features = [
+  {
+    icon: 'shield-check',
+    title: 'Data stays in your boundary',
+    body: 'Customer records, invoices and OAuth tokens move between your application and the upstream platform only. No third-party proxy sits in the data path, which is what HIPAA, PCI DSS, SOC 2 and GDPR reviews ask you to show.',
+  },
+  {
+    icon: 'coins',
+    title: 'No per-call pricing',
+    body: 'You pay for the servers you run it on. Costs grow with your infrastructure, not with your customers or their API traffic.',
+  },
+  {
+    icon: 'lock-key-open',
+    title: 'No vendor lock-in',
+    body: 'The integration logic lives in your deployment. Fork it, maintain your own branch, embed it in a product you sell.',
+  },
+  {
+    icon: 'magnifying-glass',
+    title: 'Auditable source',
+    body: 'Every line is readable, so your security team can verify the claims instead of trusting them.',
+  },
+  {
+    icon: 'link',
+    title: 'Connect Link',
+    body: 'A hosted OAuth flow your customers use to connect their own accounts. Set read-only or a scope group per link; links from the developer API are read-only by default.',
+  },
+  {
+    icon: 'robot',
+    title: 'MCP server for AI agents',
+    body: 'Give Claude, Cursor and other agents read-only access to customer data through the Model Context Protocol, scoped per customer.',
+  },
+  {
+    icon: 'database',
+    title: 'Sync, cache and export',
+    body: 'A read-through store on SQLite or Postgres with per-connection sync schedules, signed webhooks, scheduled exports to your warehouse and read-only SQL logins for BI tools.',
+  },
+  {
+    icon: 'eye-slash',
+    title: 'Masked by default',
+    body: 'Personal data is masked in the admin console. Every reveal and export is audited, and each user sees only the tenants they are allowed to.',
+  },
+  {
+    icon: 'code',
+    title: 'Typed end to end',
+    body: 'TypeScript strict mode, Zod validation at every boundary, an OpenAPI 3.1 spec and a generated TypeScript SDK.',
+  },
+]
+
+---
+
+<Base
+  title="OpenSteward"
+  description={`Self-hosted integration API: one REST API across ${total} platforms in accounting, CRM, e-commerce, logistics, payments and more. Your customers' data stays on your servers.`}
+>
+  <section class="marketing hero">
+    <div class="eyebrow hero__eyebrow">Source available · Self-hosted · License verified offline</div>
+    <h1>Your customers' data. On your servers.</h1>
+    <p class="hero__lead">
+      One REST API across accounting, CRM, e-commerce, logistics, payments, e-signature, projects,
+      customer support and inventory. {total} platform adapters, one canonical schema, and nothing
+      between your app and the upstream platform.
+    </p>
+    <div class="hero__actions">
+      <a class="btn btn--primary btn--lg" href={LINKS.license}>{LICENSE_CTA}</a>
+      <a class="btn btn--secondary btn--lg" href={LINKS.docs}>Read the docs</a>
+    </div>
+    <p class="hero__note">Limited free production use. Runs on your own infrastructure, with no phone-home.</p>
+  </section>
+
+  <section class="marketing install" aria-label="Install">
+    <div class="code-copy">
+      <pre><code>git clone https://github.com/open-steward/opensteward.git
+cd opensteward
+./scripts/generate-secrets.sh &gt; .env &amp;&amp; chmod 600 .env
+docker compose up --build</code></pre>
+      <button type="button" class="code-copy__btn" data-copy><Icon name="copy" /><span data-copy-label>Copy</span></button>
+    </div>
+    <p class="install__caption">
+      Then open <span class="mono">localhost:3000</span> and the setup wizard walks you through the rest.
+      For Kubernetes, see <a href={docsPage('#deploy-to-your-cloud-kubernetes')}>Deploy to your cloud</a>.
+    </p>
+
+    <div class="trust-row__label">Verified against the real APIs</div>
+    <ul class="trust-row">
+      {
+        verifiedLive.map((adapter) => (
+          <li class="trust-tile">
+            <span class={`vtile vtile--${adapter.vertical}`} aria-hidden="true">{adapter.name.slice(0, 1)}</span>
+            {adapter.name}
+            {levelTag(adapter.level) && (
+              <>
+                {' '}
+                <span class="trust-tile__level">{levelTag(adapter.level)}</span>
+              </>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+    <p class="trust-row__note">
+      The adapters for the other {others} platforms ship today but have not yet been run against
+      their real APIs. The <a href={docsPage('platforms/#verification')}>platform catalog</a> says which is which.
+    </p>
+  </section>
+
+  <section class="marketing section" id="how-it-works">
+    <div class="section__head">
+      <div class="eyebrow">How it works</div>
+      <h2>One integration layer, inside your own network</h2>
+      <p>
+        OpenSteward maps every platform in a vertical to one canonical shape. Your app, your AI agents
+        and your customers talk to it; it talks to the platforms.
+      </p>
+    </div>
+    <div class="flow">
+      <div class="flow__col">
+        <h3>The platforms your customers use</h3>
+        <p>{total} adapters in 9 verticals</p>
+        <ul class="flow__list">
+          {
+            verticals.map((v) => (
+              <li>
+                {v.label}{' '}
+                <span class="mono">{v.count}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="flow__arrow" aria-hidden="true">
+        <Icon name="arrows-left-right" class="icon icon--right" /><Icon name="arrows-down-up" class="icon icon--down" />
+      </div>
+      <div class="flow__col flow__col--hub">
+        <h3>OpenSteward, on your servers</h3>
+        <p>Docker Compose, or Helm in your AWS, Azure or GCP VPC</p>
+        <ul class="flow__list">
+          <li><Icon name="tree-structure" />Canonical, Zod-validated schemas</li>
+          <li><Icon name="arrows-clockwise" />Cache, sync schedules and signed events</li>
+          <li><Icon name="plugs-connected" />Unified REST API and OpenAPI 3.1 spec</li>
+          <li><Icon name="link" />Connect Link for customer OAuth</li>
+          <li><Icon name="robot" />Built-in MCP server</li>
+          <li><Icon name="monitor" />Admin console with SSO, roles and an audit log</li>
+        </ul>
+      </div>
+      <div class="flow__arrow" aria-hidden="true">
+        <Icon name="arrows-left-right" class="icon icon--right" /><Icon name="arrows-down-up" class="icon icon--down" />
+      </div>
+      <div class="flow__col">
+        <h3>Your side</h3>
+        <p>Everything stays inside your boundary</p>
+        <ul class="flow__list">
+          <li>Your app <span class="mono">REST</span></li>
+          <li>AI agents <span class="mono">MCP</span></li>
+          <li>Your systems <span class="mono">webhooks · HMAC</span></li>
+          <li>Your warehouse <span class="mono">exports · SQL</span></li>
+          <li>Your customers <span class="mono">Connect Link</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="marketing section" id="verticals">
+    <div class="section__head">
+      <div class="eyebrow">Verticals</div>
+      <h2>One shape for every platform</h2>
+      <p>
+        Each vertical has one canonical schema. Platform-specific fields are kept
+        on <span class="mono">metadata</span>, so nothing is lost when a platform has more to say.
+      </p>
+    </div>
+    <div class="verticals">
+      {
+        verticals.map((v) => (
+          <article class="vertical-card">
+            <span class={`vtile vtile--lg vtile--${v.slug}`} aria-hidden="true">{v.abbr}</span>
+            <div class="vertical-card__body">
+              <h3 class="vertical-card__title">{v.label}</h3>
+              <p class="vertical-card__text">{v.resources}.</p>
+              <p class="vertical-card__meta mono">{v.count} adapters</p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+    <div class="section__more">
+      <a class="btn btn--secondary" href={docsPage('platforms/')}>Browse all {total} platforms <Icon name="arrow-right" /></a>
+    </div>
+  </section>
+
+  <section class="marketing section" id="features">
+    <div class="section__head">
+      <div class="eyebrow">Why OpenSteward</div>
+      <h2>Built in the open. Yours to run.</h2>
+      <p>The integration layer of a unified-API vendor, without the vendor in your data path.</p>
+    </div>
+    <div class="features">
+      {
+        features.map((f) => (
+          <div class="feature">
+            <div class="feature__icon"><Icon name={f.icon} /></div>
+            <h3>{f.title}</h3>
+            <p>{f.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="marketing section" id="console">
+    <div class="showcase">
+      <div>
+        <div class="eyebrow">Admin console</div>
+        <h2>Run the whole deployment from one place</h2>
+        <p>Each page shows only what the signed-in user's role and tenant scope allow.</p>
+        <ul class="checklist">
+          <li><Icon name="check-circle" /><span><strong>Status</strong> shows the health of every vertical, and a list of problems that each come with the fix.</span></li>
+          <li><Icon name="check-circle" /><span><strong>Connections and sync jobs</strong> show every authorized account, with Sync now and a schedule per connection.</span></li>
+          <li><Icon name="check-circle" /><span><strong>{builtInDashboards} built-in dashboards</strong> and a no-code builder over the synced data.</span></li>
+          <li><Icon name="check-circle" /><span><strong>SSO with OIDC, SAML and LDAP</strong>, custom roles, SCIM and per-user tenant scope.</span></li>
+        </ul>
+        <p><a href={docsPage('admin/')}>The admin console guide <Icon name="arrow-right" /></a></p>
+      </div>
+      <figure class="screenshot">
+        <Image class="theme-light-only" src={statusLight} alt="The admin console's Status page: a Needs attention list, one health card per vertical, and a connections summary" widths={[700, 1400]} sizes="(max-width: 1000px) 100vw, 700px" />
+        <Image class="theme-dark-only" src={statusDark} alt="The admin console's Status page in the dark theme" widths={[700, 1400]} sizes="(max-width: 1000px) 100vw, 700px" />
+        <figcaption>The Status page, with demo data.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="marketing section" id="industries">
+    <div class="section__head">
+      <div class="eyebrow">For regulated industries</div>
+      <h2>Made for teams that answer to auditors</h2>
+      <p>
+        Banks and insurers pay the highest price for getting integration wrong. The playbooks cover the
+        workflows, the compliance lever, and the gaps, honestly.
+      </p>
+    </div>
+    <div class="cards">
+      <article class="info-card">
+        <h3><Icon name="bank" />For banks</h3>
+        <p>
+          A customer-360 view over the payment and accounting platforms your borrowers use, consent that
+          suits KYC, and internal AI risk agents without exposing production databases.
+        </p>
+        <a class="info-card__link" href={docsPage('business-cases/banks/')}>Read the bank playbook <Icon name="arrow-right" /></a>
+      </article>
+      <article class="info-card">
+        <h3><Icon name="umbrella" />For insurance</h3>
+        <p>
+          Pre-fill claims and underwriting from policyholders' accounting, commerce and logistics data,
+          broker dashboards across CRMs, and AI underwriting copilots on read-only data.
+        </p>
+        <a class="info-card__link" href={docsPage('business-cases/insurance/')}>Read the insurance brief <Icon name="arrow-right" /></a>
+      </article>
+      <article class="info-card">
+        <h3><Icon name="presentation-chart" />Making the case inside</h3>
+        <p>
+          A field guide for the internal champion: the pitch, the objections and the doc to send to each of
+          the seven people who can say no, from the CISO to procurement.
+        </p>
+        <a class="info-card__link" href={docsPage('business-cases/selling-internally/')}>Selling it internally <Icon name="arrow-right" /></a>
+      </article>
+    </div>
+  </section>
+
+  <section class="marketing section" id="licensing">
+    <div class="band">
+      <div>
+        <div class="eyebrow">Licensing</div>
+        <h2>Free to start, in Dev, Staging and Prod</h2>
+        <p>
+          Each install reads a license file that sets how many connections and tenants it may have. A free
+          license file is a sign-up away, and the license service lists every plan and its limits.
+        </p>
+        <p>
+          Without a license file, OpenSteward runs in community mode: one connection and one tenant.
+        </p>
+        <div class="band__actions">
+          <a class="btn btn--primary btn--lg" href={LINKS.license}>{LICENSE_CTA}</a>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><Icon name="wifi-slash" /><span><strong>Verified offline.</strong> The license file is checked on the install itself, so nothing phones home and air-gapped installs work.</span></li>
+        <li><Icon name="clock-counter-clockwise" /><span><strong>Nothing breaks at expiry.</strong> An expired install keeps its licensed features for 30 days, then runs in community mode. Nothing is deleted.</span></li>
+        <li><Icon name="briefcase" /><span><strong>Use it commercially.</strong> Run it internally, embed it in a product you sell, including SaaS, and redistribute it to your own customers.</span></li>
+        <li><Icon name="scales" /><span><strong>One restriction.</strong> You may not offer OpenSteward itself as a hosted unified-API service to third parties. <a href="/commercial-licensing/">Commercial licensing</a></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="marketing cta">
+    <h2>Keep your customers' data where it belongs</h2>
+    <p>Start with a free license file, install it in your own environment, and connect your first platform today.</p>
+    <div class="hero__actions">
+      <a class="btn btn--primary btn--lg" href={LINKS.license}>{LICENSE_CTA}</a>
+      <a class="btn btn--secondary btn--lg" href={LINKS.github}><Icon name="github-logo" />Read the code</a>
+    </div>
+  </section>
+</Base>

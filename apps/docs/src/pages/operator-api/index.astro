@@ -1,0 +1,19 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro'
+import ApiReference from '../../components/ApiReference.astro'
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Operator API',
+    description: 'The operator (admin) API of OpenSteward: users, roles, adapters, settings and audit, from the OpenAPI spec.',
+    tableOfContents: false,
+  }}
+>
+  <p>
+    The admin-api that the admin console runs on: users, roles, adapters, settings, audit and the
+    rest, from the OpenAPI spec generated from its routes. Download it as <a href="/downloads/openapi/admin-api.openapi.json">admin-api.openapi.json</a>,
+    or call it with the <a href="/postman/">Postman collection</a>.
+  </p>
+  <ApiReference spec="/downloads/openapi/admin-api.openapi.json" label="Operator API" groupNoun="section" groupsEyebrow="Sections" />
+</StarlightPage>

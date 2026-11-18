@@ -1,0 +1,66 @@
+---
+import '@design/tokens.css'
+import '@design/base.css'
+import '@design/components.css'
+import '../styles/site.css'
+import Footer from '../components/Footer.astro'
+import Header from '../components/Header.astro'
+// Through Vite, so both land in the shared, content-hashed /_astro/ and resolve on either host
+// (the 404 page is served on docs.opensteward.dev too).
+import manifestUrl from '../assets/site.webmanifest?url'
+import themeInitUrl from '../scripts/theme-init.js?url'
+
+interface Props {
+  title: string
+  description: string
+  /** A Content-Security-Policy in a <meta> tag, for pages CloudFront serves without headers. */
+  csp?: string
+  /** Prefix for links to this site; the 404 page passes https://opensteward.dev. */
+  origin?: string
+}
+
+const { title, description, csp, origin = '' } = Astro.props
+const canonical = new URL(Astro.url.pathname, Astro.site)
+const fullTitle = title === 'OpenSteward' ? title : `${title} · OpenSteward`
+const ogImage = new URL('/og.png', Astro.site)
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    {csp && <meta http-equiv="Content-Security-Policy" content={csp} />}
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {origin === '' && <link rel="canonical" href={canonical} />}
+    <meta name="theme-color" content="#3D5A33" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- A file, not inline code: applies the saved or system theme before the first paint. -->
+    <script is:inline src={themeInitUrl}></script>
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/brand/mark.svg" type="image/svg+xml" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href="/brand/mark-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
+    <link rel="manifest" href={manifestUrl} />
+    {origin === '' && <link rel="sitemap" href="/sitemap-index.xml" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="OpenSteward" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {origin === '' && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header origin={origin} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer origin={origin} />
+    <script>
+      import '../scripts/site'
+    </script>
+  </body>
+</html>

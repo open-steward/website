@@ -1,0 +1,27 @@
+# Weekly update pull requests for the pinned actions and the npm dependencies. Like pnpm's
+# minimumReleaseAge (pnpm-workspace.yaml), nothing younger than 7 days is proposed. Each pull
+# request runs "Build and check" and merges only when someone merges it. Dependabot security
+# updates are a repository setting (Settings > Advanced Security), separate from this file.
+
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ['*']
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]

@@ -1,0 +1,130 @@
+/* Starlight, dressed in the product design system.
+
+   tokens.css holds the design system's custom properties and fonts, and also styles bare
+   elements (a, h1-h6, p, code). It goes into Starlight's lowest cascade layer, so the tokens
+   and fonts apply while Starlight's own rules for its layout still win.
+
+   The tokens switch with [data-theme="dark"], which Starlight sets too, so one mapping
+   serves both themes. */
+@import '../../../../.product/packages/design-system/tokens.css' layer(starlight.base);
+
+:root,
+:root[data-theme='light'] {
+  --sl-font: var(--font-sans);
+  --sl-font-mono: var(--font-mono);
+
+  --sl-color-white: var(--fg-1);
+  --sl-color-gray-1: var(--fg-1);
+  --sl-color-gray-2: var(--fg-2);
+  --sl-color-gray-3: var(--fg-3);
+  --sl-color-gray-4: var(--fg-4);
+  --sl-color-gray-5: var(--border-default);
+  --sl-color-gray-6: var(--surface-1);
+  --sl-color-gray-7: var(--surface-0);
+  --sl-color-black: var(--paper);
+
+  --sl-color-accent-low: var(--accent-muted);
+  --sl-color-accent: var(--accent);
+  --sl-color-accent-high: var(--accent-fg);
+  --sl-color-text-accent: var(--accent-fg);
+
+  --sl-color-bg: var(--paper);
+  --sl-color-bg-nav: color-mix(in srgb, var(--paper) 92%, transparent);
+  --sl-color-bg-sidebar: var(--paper);
+  --sl-color-bg-inline-code: var(--surface-1);
+  --sl-color-hairline-light: var(--border-subtle);
+  --sl-color-hairline: var(--border-subtle);
+  --sl-color-hairline-shade: var(--border-default);
+
+  --sl-nav-height: 4rem;
+  --sl-content-width: 50rem;
+}
+
+body {
+  font-feature-settings: 'ss01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+}
+
+.header {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom-color: var(--border-subtle);
+}
+
+/* Headings and prose, after the docs-server guide pages. */
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3 {
+  letter-spacing: var(--tracking-tight);
+}
+.sl-markdown-content a {
+  color: var(--accent-fg);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.sl-markdown-content a:hover {
+  color: var(--accent);
+}
+.sl-markdown-content code:not(pre code) {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 0 0.25em;
+}
+.sl-markdown-content table {
+  font-size: var(--text-sm);
+}
+.sl-markdown-content th {
+  background: var(--surface-1);
+}
+
+/* Sidebar: the current page in the accent, as in docs-server. */
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover {
+  background: var(--accent-muted);
+  color: var(--accent-fg);
+}
+
+/* A top-level sidebar link marked as the second level of the one before it (sections.mjs
+   `child`): drawn the way Starlight draws a group's items, and always shown. */
+.sidebar-content .top-level > li:has(> a[data-sidebar-child]) {
+  margin-top: 0;
+  margin-inline-start: 0.5rem;
+  border-inline-start: 1px solid var(--sl-color-hairline-light);
+  padding-inline-start: 0.5rem;
+}
+.sidebar-content a[data-sidebar-child].large {
+  font-size: inherit;
+}
+.sidebar-content a[data-sidebar-child].large:not([aria-current='page']) {
+  font-weight: 400;
+  color: var(--sl-color-gray-2);
+}
+.sidebar-content a[data-sidebar-child].large:not([aria-current='page']):is(:hover, :focus) {
+  color: var(--sl-color-white);
+}
+@media (min-width: 50rem) {
+  .sidebar-content a[data-sidebar-child].large {
+    font-size: var(--sl-text-sm);
+  }
+}
+
+/* Mermaid diagrams, pre-rendered to one SVG per theme. */
+.diagram-figure {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: var(--surface-0);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+.diagram-figure img.diagram {
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Screenshots in the guides. */
+.sl-markdown-content img:not(.diagram) {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}

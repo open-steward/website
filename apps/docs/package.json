@@ -1,0 +1,19 @@
+{
+  "name": "@opensteward-website/docs",
+  "private": true,
+  "description": "docs.opensteward.dev: the product documentation, rendered with Starlight.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "prepare:content": "node ../../scripts/fetch-product.mjs && node ../../scripts/copy-brand.mjs public && node --env-file-if-exists=../../.env scripts/sync.mjs",
+    "dev": "pnpm prepare:content && ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "build": "pnpm prepare:content && ASTRO_TELEMETRY_DISABLED=1 astro build"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "~0.42.10",
+    "@pagefind/default-ui": "^1.6.0",
+    "@phosphor-icons/web": "2.1.2",
+    "astro": "^7.4.7",
+    "swagger-ui-dist": "5.34.1"
+  }
+}

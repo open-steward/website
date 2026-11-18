@@ -1,0 +1,63 @@
+/* The Platforms page: the product's catalogue (packages/platforms-ui).
+
+   It expects the design system's components (.segmented, .vtile, .eyebrow, .btn). They go into
+   Starlight's lowest cascade layer, as theme.css does with tokens.css, so their global rules
+   (:focus-visible, ::selection) lose to Starlight's. The catalogue's own styles and these are
+   not in a layer, so they win over both. */
+@import '../../../../.product/packages/design-system/components.css' layer(starlight.base);
+
+@layer starlight.base {
+  /* components.css also styles an app shell's .sidebar (sticky, a full viewport tall), and
+     Starlight's navigation is a <nav class="sidebar">: undo it, in the same layer. */
+  .sidebar {
+    all: revert-layer;
+  }
+}
+
+/* The grid takes the whole width beside the sidebar, as the API reference pages do. html:root
+   outranks theme.css's :root[data-theme='light'], which sets the width and loads after this. */
+html:root:has(.providers-section) {
+  --sl-content-width: 100%;
+}
+/* Some "Unsupported" notes hold long URLs; let them wrap instead of spilling out of the card. */
+.provider-card__unsupported > span:not(.chip) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Starlight's content column already has the page's margins. */
+.providers-section {
+  max-width: none;
+  padding: var(--space-2) 0 0;
+}
+
+.sl-markdown-content .platforms-eyebrow {
+  margin-bottom: 0;
+}
+.sl-markdown-content .platforms-lead {
+  margin-top: var(--space-2);
+  color: var(--fg-2);
+  max-width: 64ch;
+}
+
+.platform-list {
+  margin-top: var(--space-3);
+}
+.platform-list summary {
+  cursor: pointer;
+  color: var(--fg-2);
+}
+.platform-list ul {
+  columns: 18rem;
+  column-gap: var(--space-8);
+  padding-left: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+}
+.platform-list li {
+  break-inside: avoid;
+  margin: 0 0 var(--space-1);
+}
+.platform-list__meta {
+  color: var(--fg-3);
+}

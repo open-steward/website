@@ -1,0 +1,87 @@
+---
+import Icon from '../components/Icon.astro'
+import Base from '../layouts/Base.astro'
+import { LINKS, SUPPORT_EMAIL, docsPage } from '../data/product'
+---
+
+<Base
+  title="Security"
+  description="How OpenSteward is built for security reviews: self-hosted, auditable source, hardened defaults, offline license verification, and how to report a vulnerability."
+>
+  <div class="marketing">
+    <header class="page-head">
+      <div class="eyebrow">Security</div>
+      <h1>Built to pass your security review</h1>
+      <p>
+        OpenSteward runs inside your own infrastructure, so your security team reviews the code and the
+        deployment rather than a vendor's promises. This page is the short version; the <a href={docsPage('security/')}>security guide</a> has the threat model and the hardening checklist.
+      </p>
+    </header>
+
+    <div class="cards">
+      <article class="info-card">
+        <h3><Icon name="house-line" />Your boundary</h3>
+        <p>
+          Customer data and OAuth tokens move between your application and the upstream platform only.
+          There is no OpenSteward cloud in the data path, and no telemetry.
+        </p>
+      </article>
+      <article class="info-card">
+        <h3><Icon name="wifi-slash" />Verified offline</h3>
+        <p>
+          The license file is signed and checked on the install itself. Nothing phones home, so
+          air-gapped installs work, and an expired license never stops production: features step down
+          after a 30-day grace period and nothing is deleted.
+        </p>
+      </article>
+      <article class="info-card">
+        <h3><Icon name="magnifying-glass" />Auditable source</h3>
+        <p>
+          Every line is on GitHub. Images are multi-arch, digest-pinned, cosign-signed and SBOM-attested,
+          and the build gates on a vulnerability scan.
+        </p>
+      </article>
+    </div>
+
+    <div class="prose">
+      <h2>Hardened by default</h2>
+      <ul>
+        <li>
+          Non-root containers with read-only root filesystems, dropped capabilities and seccomp, and a
+          default-deny NetworkPolicy in the Helm chart. Published ports bind to <code>127.0.0.1</code>.
+        </li>
+        <li>
+          Production images refuse to start on a placeholder secret and name the variable at fault.
+          First-run admin creation can require a bootstrap token, so a fresh deployment cannot be
+          claimed by whoever reaches it first.
+        </li>
+        <li>
+          Outbound requests are checked against SSRF: callback URLs must be HTTPS and may not resolve to
+          loopback, private or link-local addresses. OAuth redirect URIs are allow-listed.
+        </li>
+        <li>
+          Inbound webhooks are verified against a per-platform signature registry that fails closed.
+          Secrets are compared in constant time, and credentials are redacted from logs.
+        </li>
+        <li>
+          Personal data is masked by default in the admin console; reveals and exports are audited, and
+          every change lands in a filterable, exportable audit log.
+        </li>
+        <li>SSO with OIDC, SAML or LDAP, SCIM provisioning, custom roles and per-user tenant scope.</li>
+      </ul>
+
+      <h2>Report a vulnerability</h2>
+      <p>
+        Please report security problems through <a href={LINKS.securityAdvisory}>GitHub Security Advisories</a> on the OpenSteward repository, not in public issues. We aim to acknowledge reports within 5 business
+        days and follow a coordinated 90-day disclosure window. If GitHub is not an option, write to <a href={LINKS.support}>{SUPPORT_EMAIL}</a>. The same details are in <a href="/.well-known/security.txt">security.txt</a>.
+      </p>
+
+      <h2>This website</h2>
+      <p>
+        opensteward.dev and docs.opensteward.dev are static pages. They set no cookies and load no
+        analytics, fonts or scripts from anyone else. A strict Content-Security-Policy allows only this
+        site's own files, plus platform logos from Brandfetch on the docs' Platforms page, and HSTS keeps every visit on HTTPS. Signing up for a license happens on <a href={LINKS.license}>license.opensteward.dev</a>, under its own <a href={LINKS.terms}>terms</a> and <a href={LINKS.privacy}>privacy notice</a>.
+      </p>
+    </div>
+  </div>
+</Base>

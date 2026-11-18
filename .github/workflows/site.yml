@@ -1,0 +1,281 @@
+# Builds and checks both sites on every pull request and push, without AWS access. On a push
+# to main, deploys the checked build with the GitHub OIDC deploy role.
+#
+# The work is split into jobs, and a pull request runs only the ones its files can affect
+# (the "What changed" job decides; pushes to main and manual runs, the product sync's
+# included, run everything):
+#
+#   What changed  ->  Stack            infra/: its tests and typecheck
+#                 ->  Sites            unit tests, build, typecheck, built-HTML check; keeps out/
+#                       ->  Browser check (chromium), Browser check (webkit), in parallel
+#   Build and check: passes when every job above passed or was skipped. It is the check the
+#   ruleset on main requires and the product sync waits for. Skipped jobs count as passed;
+#   a workflow-level `paths:` filter would instead leave the required check waiting forever.
+#
+# A pull request labelled skip-browser-check skips the browser jobs. Pushes to main always
+# run them, so a deploy always comes from a full check.
+#
+# Repository variables (Settings > Secrets and variables > Actions > Variables), from the
+# stack's outputs: DEPLOY_ROLE_ARN, BUCKET_NAME, DISTRIBUTION_ID. The deploy job skips until
+# DEPLOY_ROLE_ARN is set.
+#
+# The product sync (product-sync.yml) starts this workflow itself, on its branch and then on
+# main: what its token does starts no workflow.
+#
+# Every action is pinned to a full commit SHA; the comment names its release.
+
+name: Site
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: What changed
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      infra: ${{ steps.areas.outputs.infra }}
+      site: ${{ steps.areas.outputs.site }}
+    steps:
+      # On a pull request this is GitHub's merge of the branch into main: its first parent is
+      # main, so the diff against it is exactly what the pull request changes.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+
+      - name: Decide which jobs this change needs
+        id: areas
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          infra=false
+          site=false
+          if [ "$EVENT" != pull_request ]; then
+            infra=true
+            site=true
+          else
+            git diff --name-only HEAD^1 HEAD > "$RUNNER_TEMP/changed"
+            cat "$RUNNER_TEMP/changed"
+            while IFS= read -r file; do
+              case "$file" in
+                README.md | THIRD-PARTY-NOTICES.md | .github/dependabot.yml) ;;
+                infra/functions/*) infra=true; site=true ;;
+                infra/*) infra=true ;;
+                apps/* | scripts/* | product.json | vitest.config.mjs) site=true ;;
+                *) infra=true; site=true ;;
+              esac
+            done < "$RUNNER_TEMP/changed"
+          fi
+          echo "stack: $infra, sites: $site"
+          echo "infra=$infra" >> "$GITHUB_OUTPUT"
+          echo "site=$site" >> "$GITHUB_OUTPUT"
+
+  infra:
+    name: Stack
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Tests (stack, CloudFront Functions)
+        run: pnpm --filter @opensteward-website/infra test
+
+      - name: Typecheck
+        run: pnpm --filter @opensteward-website/infra typecheck
+
+  site:
+    name: Sites
+    needs: changes
+    if: needs.changes.outputs.site == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      # The product sync's branch merges by itself, so there a diagram Mermaid cannot parse, a
+      # docs link or anchor that does not resolve, or a spec link to no page fails the check.
+      DOCS_STRICT: ${{ (github.ref_name == 'product-sync' || github.head_ref == 'product-sync') && '1' || '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Headless Chromium only, for the Mermaid diagrams and their tests. The runner image
+      # already has the system libraries it needs, so no apt step.
+      - name: Install headless Chromium (Mermaid)
+        timeout-minutes: 5
+        run: pnpm exec playwright install --only-shell chromium
+
+      - name: Unit tests (build scripts, both apps; fetches the product first)
+        run: node scripts/fetch-product.mjs && pnpm exec vitest run
+
+      - name: Build both sites
+        run: pnpm build
+        env:
+          ASTRO_TELEMETRY_DISABLED: '1'
+          # The docs' Platforms page hotlinks logos from Brandfetch with it; without it, initials.
+          BRANDFETCH_CLIENT_ID: ${{ vars.BRANDFETCH_CLIENT_ID }}
+
+      - name: Typecheck both apps (against the types the build generated)
+        run: pnpm exec tsc --noEmit -p apps/site && pnpm exec tsc --noEmit -p apps/docs
+
+      - name: Check the built HTML (no inline code, no third parties, links resolve)
+        run: pnpm check:html
+
+      - name: Keep the build for the browser check and the deploy
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: out
+          path: out/
+          include-hidden-files: true
+          retention-days: ${{ github.event_name == 'pull_request' && 3 || 7 }}
+          if-no-files-found: error
+
+  browser:
+    name: Browser check
+    needs: site
+    if: needs.site.result == 'success' && !contains(github.event.pull_request.labels.*.name, 'skip-browser-check')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Headless Chromium runs on the runner image's libraries; WebKit needs its own from apt.
+      # An apt mirror once stalled that for 19 minutes: fail fast instead, and re-run.
+      - name: Install ${{ matrix.browser }}
+        timeout-minutes: 6
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: |
+          if [ "$BROWSER" = webkit ]; then
+            pnpm exec playwright install --with-deps "$BROWSER"
+          else
+            pnpm exec playwright install --only-shell "$BROWSER"
+          fi
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: out
+          path: out/
+
+      - name: Check in ${{ matrix.browser }} under the production headers
+        run: pnpm test:browser
+        env:
+          BROWSER: ${{ matrix.browser }}
+
+  check:
+    name: Build and check
+    needs: [changes, infra, site, browser]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Every job passed or was skipped
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "$RESULTS"
+          for result in $RESULTS; do
+            case "$result" in
+              success | skipped) ;;
+              *) exit 1 ;;
+            esac
+          done
+
+  deploy:
+    name: Deploy
+    needs: check
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.DEPLOY_ROLE_ARN != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # No `environment:` here: the deploy role trusts the token subject of main itself
+    # (repo:...:ref:refs/heads/main); a job with an environment presents a different one.
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # No install scripts in the job that later holds AWS credentials; the deploy needs only
+      # the AWS SDK's JavaScript.
+      - name: Install dependencies (no install scripts)
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: out
+          path: out/
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.DEPLOY_ROLE_ARN }}
+          role-session-name: website-deploy-${{ github.run_id }}
+          aws-region: us-east-1
+
+      - name: Upload, delete what is gone, invalidate
+        run: node scripts/deploy.mjs
+        env:
+          BUCKET: ${{ vars.BUCKET_NAME }}
+          DISTRIBUTION_ID: ${{ vars.DISTRIBUTION_ID }}

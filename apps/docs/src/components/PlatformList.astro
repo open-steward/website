@@ -1,0 +1,32 @@
+---
+// Every platform as a plain list, from the platforms.json scripts/sync.mjs copies into public/:
+// docs search indexes it (the catalogue's cards are drawn in the browser), and it is what readers
+// without JavaScript get.
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { platformList } from '../../scripts/platforms.mjs'
+
+// Relative to the app folder: Astro bundles this file before running it.
+const dataset = JSON.parse(readFileSync(join(process.cwd(), 'public/platforms/platforms.json'), 'utf8'))
+const guides = join(process.cwd(), 'src/content/docs/integrate')
+const list = platformList(dataset, (vertical, slug) => existsSync(join(guides, vertical, `${slug}.md`)))
+const total = list.length.toLocaleString('en-US')
+---
+
+<!-- Its own heading, so a docs search hit in the list points here, not at the section above. -->
+<h2 id="all-platforms">All platforms</h2>
+<details class="platform-list">
+  <summary>All {total} platforms as a list</summary>
+  <ul>
+    {
+      list.map((p) => (
+        <li>
+          {p.guide ? <a href={p.guide}>{p.name}</a> : p.name}{' '}
+          <span class="platform-list__meta">
+            {p.label} · <code>{p.slug}</code>
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+</details>

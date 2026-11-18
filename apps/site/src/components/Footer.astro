@@ -1,0 +1,56 @@
+---
+import Mark from './Mark.astro'
+import { LINKS, SUPPORT_EMAIL, docsPage } from '../data/product'
+
+interface Props {
+  /** Prefix for links to this site: the 404 page is also served on docs.opensteward.dev. */
+  origin?: string
+}
+const { origin = '' } = Astro.props
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__brand">
+      <a href={`${origin}/`} class="oi-nav__brand" aria-label="OpenSteward home">
+        <Mark class="oi-nav__mark" />
+        <span class="wordmark"><span>Open</span><span>Steward</span></span>
+      </a>
+      <p>Your customers' data. On your servers.</p>
+      <p><a href={LINKS.support}>{SUPPORT_EMAIL}</a></p>
+    </div>
+    <nav class="site-footer__cols" aria-label="Footer">
+      <div>
+        <h2>Product</h2>
+        <ul>
+          <li><a href={`${origin}/#features`}>Features</a></li>
+          <li><a href={`${origin}/#verticals`}>Verticals</a></li>
+          <li><a href={`${origin}/security/`}>Security</a></li>
+          <li><a href={docsPage('platforms/')}>Platform catalog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Developers</h2>
+        <ul>
+          <li><a href={LINKS.docs}>Documentation</a></li>
+          <li><a href={docsPage('unified-api/')}>Unified API</a></li>
+          <li><a href={docsPage('mcp/')}>MCP for AI agents</a></li>
+          <li><a href={LINKS.github}>Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Licensing</h2>
+        <ul>
+          <li><a href={LINKS.license}>Plans and free license</a></li>
+          <li><a href={`${origin}/commercial-licensing/`}>Commercial licensing</a></li>
+          <li><a href={LINKS.terms}>Terms</a></li>
+          <li><a href={LINKS.privacy}>Privacy</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="site-footer__legal">
+    <p>© 2026 Falco Consulting AB. OpenSteward is source available under the Elastic License 2.0 with an Additional Use Grant.</p>
+    <p>This site sets no cookies, runs no analytics and loads nothing from other sites.</p>
+  </div>
+</footer>

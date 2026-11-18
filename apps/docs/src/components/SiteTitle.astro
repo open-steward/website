@@ -1,0 +1,50 @@
+---
+// The product's brand lock-up (the docs-server header): the key mark, the two-weight
+// wordmark, and "Docs".
+const { siteTitleHref } = Astro.locals.starlightRoute
+---
+
+<a href={siteTitleHref} class="site-title" aria-label="OpenSteward Docs home">
+  <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+    <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="18" cy="32" r="8.5"></circle>
+      <line x1="26.5" y1="32" x2="52" y2="32"></line>
+      <line x1="44" y1="32" x2="44" y2="40"></line>
+      <line x1="50" y1="32" x2="50" y2="38"></line>
+    </g>
+  </svg>
+  <span class="wordmark" translate="no"><span>Open</span><span>Steward</span></span>
+  <span class="docs-label">Docs</span>
+</a>
+
+<style>
+  .site-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--fg-1);
+    text-decoration: none;
+    white-space: nowrap;
+    min-width: 0;
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-tight);
+  }
+  .mark {
+    width: 28px;
+    height: 28px;
+    color: var(--accent);
+    flex: none;
+  }
+  .wordmark span:first-child {
+    font-weight: 500;
+  }
+  .wordmark span:last-child {
+    font-weight: 700;
+  }
+  .docs-label {
+    color: var(--fg-3);
+    font-weight: 500;
+    padding-inline-start: 0.5rem;
+    border-inline-start: 1px solid var(--border-default);
+  }
+</style>

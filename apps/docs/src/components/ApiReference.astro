@@ -1,0 +1,64 @@
+---
+/**
+ * Swagger UI for one OpenAPI spec, with the sidebar the product's docs-server puts beside it: a
+ * rail of the spec's tag groups and their operations, and one filter. Ported from the product's
+ * apps/docs-server/src/swagger-reference.ts, with two differences:
+ *
+ * - No inline script or style (the Content-Security-Policy allows neither): Swagger UI's bundle
+ *   is a file from the swagger-ui-dist package, served from this site like any other script, and
+ *   the rail is src/scripts/api-reference.ts.
+ * - Read-only: "Try it out" is off. Here there is no API to call (an install's own docs-server
+ *   has it), and the policy's connect-src 'self' would block the requests anyway.
+ */
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+import 'swagger-ui-dist/swagger-ui.css'
+import '../../../../.product/packages/design-system/swagger-theme.css'
+import '../styles/api-reference.css'
+import swaggerBundle from 'swagger-ui-dist/swagger-ui-bundle.js?url'
+
+interface Props {
+  /** The spec, as published by scripts/sync.mjs (under /downloads/). */
+  spec: string
+  /** Names the page in the rail's label, e.g. "Unified API". */
+  label: string
+  /** What one tag group is called, lower case: "vertical", "section". */
+  groupNoun: string
+  /** The heading over the tag rail: "Verticals", "Sections". */
+  groupsEyebrow: string
+}
+
+const { spec, label, groupNoun, groupsEyebrow } = Astro.props
+if (!existsSync(join(process.cwd(), 'public', spec))) {
+  throw new Error(`${spec} is not in public/: scripts/sync.mjs publishes it, run it first`)
+}
+---
+
+<div class="api-ref not-content" data-api-ref data-spec={spec} data-noun={groupNoun} data-pagefind-ignore>
+  <aside class="api-ref__rail" aria-label={`${label} navigation`}>
+    <div class="api-ref__filter">
+      <input type="search" data-filter placeholder="Filter operations…" aria-label="Filter operations by path or summary" />
+    </div>
+    <div class="api-ref__section">
+      <div class="api-ref__eyebrow">{groupsEyebrow}</div>
+      <div data-rail-tags><div class="api-ref__empty">Loading…</div></div>
+    </div>
+    <div class="api-ref__section">
+      <div class="api-ref__eyebrow">Operations</div>
+      <div data-rail-ops><div class="api-ref__empty">Select a {groupNoun} above.</div></div>
+    </div>
+  </aside>
+  <div class="api-ref__main">
+    <div id="swagger-ui"></div>
+    <noscript>
+      <p class="api-ref__empty">This reference needs JavaScript. The <a href={spec}>spec itself</a> is plain JSON.</p>
+    </noscript>
+  </div>
+</div>
+
+<!-- A classic script, so it has run before the module below (modules wait for the parse). -->
+<script is:inline src={swaggerBundle}></script>
+<script>
+  import { start } from '../scripts/api-reference'
+  start()
+</script>
