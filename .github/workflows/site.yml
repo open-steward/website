@@ -166,7 +166,7 @@ jobs:
           if-no-files-found: error
 
   browser:
-    name: Browser check (${{ matrix.browser }})
+    name: Browser check
     needs: site
     if: needs.site.result == 'success' && !contains(github.event.pull_request.labels.*.name, 'skip-browser-check')
     runs-on: ubuntu-24.04
@@ -174,12 +174,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # Headless Chromium runs on the runner image's libraries; WebKit needs its own from apt.
-          - browser: chromium
-            apt: false
-          - browser: webkit
-            apt: true
+        browser: [chromium, webkit]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -195,14 +190,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # An apt mirror once stalled this for 19 minutes: fail fast instead, and re-run.
+      # Headless Chromium runs on the runner image's libraries; WebKit needs its own from apt.
+      # An apt mirror once stalled that for 19 minutes: fail fast instead, and re-run.
       - name: Install ${{ matrix.browser }}
         timeout-minutes: 6
         env:
           BROWSER: ${{ matrix.browser }}
-          APT: ${{ matrix.apt }}
         run: |
-          if [ "$APT" = true ]; then
+          if [ "$BROWSER" = webkit ]; then
             pnpm exec playwright install --with-deps "$BROWSER"
           else
             pnpm exec playwright install --only-shell "$BROWSER"
