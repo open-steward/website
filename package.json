@@ -18,8 +18,8 @@
     "typecheck": "pnpm --filter @opensteward-website/infra typecheck && tsc --noEmit -p apps/site && tsc --noEmit -p apps/docs"
   },
   "devDependencies": {
-    "@aws-sdk/client-cloudfront": "^3.1164.0",
-    "@aws-sdk/client-s3": "^3.1164.0",
+    "@aws-sdk/client-cloudfront": "^3.1167.0",
+    "@aws-sdk/client-s3": "^3.1167.0",
     "github-slugger": "^2.0.0",
     "hast-util-select": "^6.0.4",
     "htmlparser2": "^10.1.0",
