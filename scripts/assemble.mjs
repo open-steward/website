@@ -16,6 +16,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { copyNewFiles } from './lib/copy-new.mjs'
 import { StyleCollector, linkStylesheet } from './lib/externalize-styles.mjs'
 import { pageToMarkdown } from './lib/html-to-markdown.mjs'
 
@@ -53,7 +54,7 @@ cpSync(join(out, 'site/404.html'), join(out, '404.html'))
 // Markdown for agents.
 const docsMarkdown = join(root, 'apps/docs/markdown')
 if (!existsSync(join(docsMarkdown, 'llms.txt'))) throw new Error('apps/docs/markdown/ is empty: run the docs sync first')
-cpSync(docsMarkdown, join(out, 'docs'), { recursive: true, force: false, errorOnExist: true })
+copyNewFiles(docsMarkdown, join(out, 'docs'))
 for (const file of htmlFiles(join(out, 'site'))) {
   const page = pagePath(join(out, 'site'), file)
   if (page === null) continue
