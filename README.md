@@ -378,7 +378,7 @@ $8 a month ($5 for the web ACL, $1 per rule) prorated by the hour, so about a ce
 step 7 as soon as the deploy finishes. The certificate is free; S3 storage for about 40 MB is a
 fraction of a cent.
 
-### 5. Set the repository variables
+### 5. Set the repository variables and secret
 
 The stack prints its outputs; or read them again:
 
@@ -386,13 +386,17 @@ The stack prints its outputs; or read them again:
 aws cloudformation describe-stacks --stack-name OpenSteward-Website --region us-east-1 --query "Stacks[0].Outputs"
 ```
 
-Then set three variables (variables, not secrets: none of them is a credential):
+Then set two variables and one secret:
 
 ```sh
-gh variable set DEPLOY_ROLE_ARN --repo open-steward/website --body "<DeployRoleArn>"
 gh variable set BUCKET_NAME --repo open-steward/website --body "<BucketName>"
 gh variable set DISTRIBUTION_ID --repo open-steward/website --body "<DistributionId>"
+gh secret set DEPLOY_ROLE_ARN --repo open-steward/website --body "<DeployRoleArn>"
 ```
+
+None of them is a credential. The role ARN is a secret only because it holds the AWS account ID
+and this repository's run logs are public: GitHub masks secrets in logs, and the deploy job also
+masks the account ID in anything AWS prints.
 
 The build also reads `BRANDFETCH_CLIENT_ID` (already set), for the Platforms page's logos. It is
 not a secret, since it appears in every logo URL, but it belongs to OpenSteward's Brandfetch account.
@@ -404,7 +408,8 @@ gh variable set BRANDFETCH_CLIENT_ID --repo open-steward/website --body "<client
 
 ### 6. Run the workflow
 
-The deploy job runs on pushes to main once `DEPLOY_ROLE_ARN` is set. After the first merge, or to
+The deploy job runs on pushes to main once `BUCKET_NAME` is set (and stops with an error if the
+`DEPLOY_ROLE_ARN` secret is not). After the first merge, or to
 deploy again without a change:
 
 ```sh
