@@ -10,9 +10,9 @@
     "build": "pnpm prepare:assets && ASTRO_TELEMETRY_DISABLED=1 astro build"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/sitemap": "^3.7.5",
     "@phosphor-icons/core": "^2.1.1",
-    "astro": "^7.4.7",
+    "astro": "^7.4.12",
     "github-slugger": "^2.0.0",
     "mdast-util-to-string": "^4.0.0",
     "rehype-stringify": "^10.0.1",
