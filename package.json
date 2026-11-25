@@ -18,13 +18,13 @@
     "typecheck": "pnpm --filter @opensteward-website/infra typecheck && tsc --noEmit -p apps/site && tsc --noEmit -p apps/docs"
   },
   "devDependencies": {
-    "@aws-sdk/client-cloudfront": "^3.1164.0",
-    "@aws-sdk/client-s3": "^3.1164.0",
+    "@aws-sdk/client-cloudfront": "^3.1171.0",
+    "@aws-sdk/client-s3": "^3.1171.0",
     "github-slugger": "^2.0.0",
     "hast-util-select": "^6.0.4",
     "htmlparser2": "^10.1.0",
     "mermaid": "^12.3.0",
-    "playwright": "^1.65.0",
+    "playwright": "^1.65.1",
     "rehype-parse": "^9.0.1",
     "rehype-remark": "^10.0.1",
     "rehype-stringify": "^10.0.1",
@@ -36,7 +36,7 @@
     "typescript": "~6.0.3",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.2.0",
-    "vitest": "^5.1.0",
+    "vitest": "^5.1.1",
     "yaml": "^2.9.1"
   }
 }

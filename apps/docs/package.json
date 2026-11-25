@@ -10,10 +10,10 @@
     "build": "pnpm prepare:content && ASTRO_TELEMETRY_DISABLED=1 astro build"
   },
   "dependencies": {
-    "@astrojs/starlight": "~0.42.10",
+    "@astrojs/starlight": "~0.43.1",
     "@pagefind/default-ui": "^1.6.0",
     "@phosphor-icons/web": "2.1.2",
-    "astro": "^7.4.7",
-    "swagger-ui-dist": "5.34.1"
+    "astro": "^7.4.12",
+    "swagger-ui-dist": "5.35.0"
   }
 }
